@@ -18,11 +18,12 @@ import {
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
-import { CartContext } from "../context/CartContext";
+import { CartContext } from "../context/cart-context";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const MotionDiv = motion.div;
 
   const { cartItems, addToCart } = useContext(CartContext);
 
@@ -118,7 +119,7 @@ const ProductDetails = () => {
     <>
       <Navbar />
 
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen text-white"
@@ -151,7 +152,7 @@ const ProductDetails = () => {
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
             {/* LEFT IMAGE */}
 
-            <motion.div
+            <MotionDiv
               initial={{ x: -50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               className="bg-white rounded-2xl p-6 lg:p-8 flex justify-center items-center min-h-[420px] lg:min-h-[500px]"
@@ -161,11 +162,11 @@ const ProductDetails = () => {
                 alt={product.title}
                 className="max-h-[320px] lg:max-h-[400px] object-contain hover:scale-105 duration-500"
               />
-            </motion.div>
+            </MotionDiv>
 
             {/* RIGHT SIDE */}
 
-            <motion.div
+            <MotionDiv
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
             >
@@ -296,7 +297,7 @@ const ProductDetails = () => {
                   <ChevronRight size={18} />
                 </button>
               </div>
-            </motion.div>
+            </MotionDiv>
           </div>
           {/* Related Products */}
 
@@ -317,7 +318,7 @@ const ProductDetails = () => {
           </div>
         </div>
          <Footer />
-      </motion.div>
+      </MotionDiv>
     </>
   );
 };

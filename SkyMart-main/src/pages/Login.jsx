@@ -71,7 +71,7 @@ const Login = () => {
 
           <h1 className="text-3xl font-bold">
             {/* <span className="text-white">Sky</span> */}
-            <span className="text-[#FF8FC7]">PrimeBasket</span>
+            <span className="text-[#FF8FC7]">Wisteria Cart</span>
           </h1>
         </div>
 

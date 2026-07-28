@@ -1,311 +1,185 @@
-import { ShoppingBag, X, Trash2, Plus, Minus } from "lucide-react";
-import { useContext } from "react";
-import { CartContext } from "../context/CartContext";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { PackageSearch } from "lucide-react";
+import { useSearchParams } from "react-router";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import ProductCard from "../components/ProductCard";
+import SearchFilter from "../components/SearchFilter";
 
-const Cart = () => {
-  const {
-    cartItems,
-    removeFromCart,
-    increaseQty,
-    decreaseQty,
-    clearCart,
-    checkout,
-    totalPrice,
-    isCartOpen,
-    setIsCartOpen,
-  } = useContext(CartContext);
+const Shop = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "all");
+  const [sort, setSort] = useState(searchParams.get("sort") || "featured");
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setCategory(searchParams.get("category") || "all");
+    setSort(searchParams.get("sort") || "featured");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const params = {};
+
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+
+    if (category !== "all") {
+      params.category = category;
+    }
+
+    if (sort !== "featured") {
+      params.sort = sort;
+    }
+
+    setSearchParams(params, { replace: true });
+  }, [search, category, sort, setSearchParams]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const response = await axios.get("https://dummyjson.com/products");
+        setProducts(response.data.products || []);
+      } catch (err) {
+        console.log("Failed to load products:", err);
+        setError("Failed to load products. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const filtered = products.filter((product) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        product.title.toLowerCase().includes(normalizedSearch) ||
+        product.description.toLowerCase().includes(normalizedSearch) ||
+        product.category.toLowerCase().includes(normalizedSearch);
+
+      const matchesCategory =
+        category === "all" || product.category === category;
+
+      return matchesSearch && matchesCategory;
+    });
+
+    switch (sort) {
+      case "low-high":
+        return [...filtered].sort((a, b) => a.price - b.price);
+      case "high-low":
+        return [...filtered].sort((a, b) => b.price - a.price);
+      case "rating":
+        return [...filtered].sort((a, b) => b.rating - a.rating);
+      default:
+        return filtered;
+    }
+  }, [products, search, category, sort]);
+
+  const hasFilters =
+    search.trim() || category !== "all" || sort !== "featured";
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        onClick={() => setIsCartOpen(false)}
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-all duration-300 ${
-          isCartOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-      />
+    <div className="min-h-screen text-white" style={{ background: "var(--bg)" }}>
+      <Navbar />
 
-      {/* Drawer */}
-      <aside
-        className={`fixed top-0 right-0 h-screen w-full max-w-[430px]
-        bg-[rgba(255,255,255,0.82)]
-        backdrop-blur-2xl
-        border-l border-white/50
-        shadow-[-10px_0_40px_rgba(148,0,211,.15)]
-        z-50
-        flex
-        flex-col
-        transition-transform
-        duration-300
-        ${
-          isCartOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        {/* Header */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <section className="neu rounded-3xl px-6 py-8 sm:px-8 sm:py-10">
+          <p className="text-sm uppercase tracking-[4px] text-[#FF8FC7]">
+            Browse Products
+          </p>
 
-        <div className="px-7 py-6 border-b border-purple-100">
+          <h1 className="mt-3 text-3xl sm:text-4xl font-bold">
+            Shop Wisteria Cart
+          </h1>
 
-          <div className="flex items-center justify-between">
+          <p className="mt-4 max-w-2xl text-[#8C8C8C] leading-7">
+            Explore curated products, filter by category, and sort the catalog
+            to find exactly what you need.
+          </p>
+        </section>
 
-            <div className="flex items-center gap-4">
+        <SearchFilter
+          search={search}
+          setSearch={setSearch}
+          category={category}
+          setCategory={setCategory}
+          sort={sort}
+          setSort={setSort}
+        />
 
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center shadow-lg">
-
-                <ShoppingBag
-                  size={22}
-                  className="text-white"
-                />
-
-              </div>
-
-              <div>
-
-                <h2
-                  className="text-2xl text-[var(--text)]"
-                  style={{ fontFamily: "Clash Display" }}
-                >
-                  Shopping Cart
-                </h2>
-
-                <p className="text-sm text-[var(--text-soft)]">
-                  {cartItems.length} Item{cartItems.length !== 1 ? "s" : ""}
-                </p>
-
-              </div>
-
-            </div>
-
-            <button
-              onClick={() => setIsCartOpen(false)}
-              className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition"
-            >
-              <X size={18} />
-            </button>
-
+        <section className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold">All Products</h2>
+            <p className="mt-1 text-sm text-[#8C8C8C]">
+              {loading ? "Loading products..." : `${filteredProducts.length} products found`}
+            </p>
           </div>
 
-        </div>
+          {hasFilters ? (
+            <button
+              onClick={() => {
+                setSearch("");
+                setCategory("all");
+                setSort("featured");
+              }}
+              className="neu-btn neu self-start rounded-2xl px-5 py-3 text-sm font-semibold hover:text-[#FF8FC7] transition"
+            >
+              Clear Filters
+            </button>
+          ) : null}
+        </section>
 
-        {/* Body */}
-
-        <div className="flex-1 overflow-y-auto p-6">
-
-          {cartItems.length === 0 ? (
-
-            <div className="h-full flex flex-col items-center justify-center text-center">
-
-              <div className="w-28 h-28 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center shadow-xl">
-
-                <ShoppingBag
-                  size={45}
-                  className="text-white"
-                />
-
-              </div>
-
-              <h2
-                className="mt-8 text-3xl text-[var(--text)]"
-                style={{ fontFamily: "Clash Display" }}
-              >
-                Your Cart is Empty
-              </h2>
-
-              <p className="mt-3 text-[var(--text-soft)] leading-7">
-                Looks like you haven't added anything yet.
-              </p>
-
-              <button
-                onClick={() => setIsCartOpen(false)}
-                className="mt-8 px-8 h-12 rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] text-white font-semibold shadow-lg hover:scale-105 transition"
-              >
-                Continue Shopping
-              </button>
-
-            </div>
-
-          ) : (
-
-            cartItems.map((item) => (
-
+        {loading ? (
+          <section className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
               <div
-                key={item.id}
-                className="mb-5 rounded-3xl bg-white shadow-md p-4"
-              >
+                key={index}
+                className="neu animate-pulse rounded-3xl h-[420px]"
+              />
+            ))}
+          </section>
+        ) : null}
 
-                <div className="flex gap-4">
+        {!loading && error ? (
+          <section className="neu mt-8 rounded-3xl px-6 py-12 text-center">
+            <p className="text-lg text-red-400">{error}</p>
+          </section>
+        ) : null}
 
-                  {/* Image */}
+        {!loading && !error && filteredProducts.length === 0 ? (
+          <section className="neu mt-8 rounded-3xl px-6 py-14 text-center">
+            <PackageSearch size={42} className="mx-auto text-[#FF8FC7]" />
+            <h3 className="mt-5 text-2xl font-semibold">No products found</h3>
+            <p className="mt-3 text-[#8C8C8C]">
+              Try changing your search, category, or sort options.
+            </p>
+          </section>
+        ) : null}
 
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-white to-[var(--surface)] flex items-center justify-center">
+        {!loading && !error && filteredProducts.length > 0 ? (
+          <section className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </section>
+        ) : null}
+      </main>
 
-                    <img
-                      src={item.thumbnail}
-                      alt={item.title}
-                      className="w-16 h-16 object-contain"
-                    />
-
-                  </div>
-
-                  {/* Info */}
-
-                  <div className="flex-1">
-
-                    <h3
-                      className="text-lg font-semibold text-[var(--text)] line-clamp-2"
-                      style={{ fontFamily: "Syne" }}
-                    >
-                      {item.title}
-                    </h3>
-
-                    <p
-                      className="mt-2 text-2xl text-[var(--primary)]"
-                      style={{ fontFamily: "Clash Display" }}
-                    >
-                      ${item.price}
-                    </p>
-
-                    <div className="mt-4 flex items-center justify-between">
-
-                      <div className="flex items-center gap-2">
-
-                        <button
-                          onClick={() => decreaseQty(item.id)}
-                          className="w-9 h-9 rounded-full bg-[var(--surface)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition"
-                        >
-                          <Minus size={15} />
-                        </button>
-
-                        <span className="w-8 text-center font-semibold text-[var(--text)]">
-                          {item.quantity}
-                        </span>
-
-                        <button
-                          onClick={() => increaseQty(item.id)}
-                          className="w-9 h-9 rounded-full bg-[var(--surface)] flex items-center justify-center hover:bg-[var(--primary)] hover:text-white transition"
-                        >
-                          <Plus size={15} />
-                        </button>
-
-                      </div>
-
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition"
-                      >
-                        <Trash2 size={18} className="mx-auto" />
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            ))
-
-          )}
-
-        </div>
-                {/* Footer */}
-
-        {cartItems.length > 0 && (
-          <div className="border-t border-purple-100 bg-white/70 backdrop-blur-xl p-6">
-
-            {/* Summary */}
-
-            <div className="space-y-3">
-
-              <div className="flex justify-between text-[var(--text-soft)]">
-
-                <span>Subtotal</span>
-
-                <span>${totalPrice.toFixed(2)}</span>
-
-              </div>
-
-              <div className="flex justify-between text-[var(--text-soft)]">
-
-                <span>Shipping</span>
-
-                <span className="text-green-600 font-medium">
-                  Free
-                </span>
-
-              </div>
-
-              <div className="border-t border-purple-100 pt-4 flex justify-between items-center">
-
-                <span
-                  className="text-lg font-semibold text-[var(--text)]"
-                >
-                  Total
-                </span>
-
-                <span
-                  className="text-3xl text-[var(--primary)]"
-                  style={{ fontFamily: "Clash Display" }}
-                >
-                  ${totalPrice.toFixed(2)}
-                </span>
-
-              </div>
-
-            </div>
-
-            {/* Checkout */}
-
-            <button
-              onClick={checkout}
-              className="
-                mt-6
-                w-full
-                h-14
-                rounded-full
-                bg-gradient-to-r
-                from-[var(--primary)]
-                to-[var(--secondary)]
-                text-white
-                text-lg
-                font-semibold
-                shadow-lg
-                hover:scale-[1.02]
-                transition-all
-                duration-300
-              "
-            >
-              Proceed to Checkout →
-            </button>
-
-            {/* Clear Cart */}
-
-            <button
-              onClick={clearCart}
-              className="
-                mt-4
-                w-full
-                h-12
-                rounded-full
-                border
-                border-red-200
-                text-red-500
-                hover:bg-red-500
-                hover:text-white
-                transition-all
-                duration-300
-              "
-            >
-              Clear Cart
-            </button>
-
-          </div>
-        )}
-
-      </aside>
-
-    </>
+      <Footer />
+    </div>
   );
 };
 
-export default Cart;
+export default Shop;

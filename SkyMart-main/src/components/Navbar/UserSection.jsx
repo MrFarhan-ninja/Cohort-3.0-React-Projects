@@ -38,7 +38,8 @@ const UserSection = ({
             {user?.fullName}
           </p> */}
           <p className="text-sm font-semibold text-[var(--text)]">
-            Hi, {user?.fullName}
+            Hi, {user?.name?.split(" ")[0]} 👋
+        
           </p>
         </div>
       </div>

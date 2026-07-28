@@ -1,9 +1,8 @@
-import { createContext, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { CartContext } from "./cart-context";
 
-export const CartContext = createContext();
-
-const CART_STORAGE_KEY = "skymart_cart";
+const CART_STORAGE_KEY = "wisteria_cart";
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
@@ -25,107 +24,101 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
- const addToCart = (product) => {
-  const exists = cartItems.find((item) => item.id === product.id);
+  const addToCart = (product) => {
+    const exists = cartItems.find((item) => item.id === product.id);
 
-  if (exists) {
+    if (exists) {
+      setIsCartOpen(true);
+      return;
+    }
+
+    setCartItems((prev) => [
+      ...prev,
+      {
+        ...product,
+        quantity: 1,
+      },
+    ]);
+
     setIsCartOpen(true);
-    return;
-  }
 
-  setCartItems((prev) => [
-    ...prev,
-    {
-      ...product,
-      quantity: 1,
-    },
-  ]);
+    toast.success("Added to cart ✅", {
+      style: {
+        background: "#FF8FC7",
+        color: "#000",
+      },
+      iconTheme: {
+        primary: "#000",
+        secondary: "#FF8FC7",
+      },
+    });
+  };
 
-  setIsCartOpen(true);
+  const removeFromCart = (id) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
 
-  toast.success("Added to cart ✅", {
-    style: {
-      background: "#FF8FC7",
-      color: "#000",
-    },
-    iconTheme: {
-      primary: "#000",
-      secondary: "#FF8FC7",
-    },
-  });
-};
+    toast.error("Product removed", {
+      style: {
+        background: "#151515",
+        color: "#fff",
+      },
+    });
+  };
 
-const removeFromCart = (id) => {
-  setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const increaseQty = (id) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
+      ),
+    );
+  };
 
-  toast.error("Product removed", {
-    style: {
-      background: "#151515",
-      color: "#fff",
-    },
-  });
-};
+  const decreaseQty = (id) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              quantity: item.quantity > 1 ? item.quantity - 1 : 1,
+            }
+          : item,
+      ),
+    );
+  };
 
-const increaseQty = (id) => {
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
-    )
+  const totalPrice = cartItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
   );
-};
-
- const decreaseQty = (id) => {
-  setCartItems((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            quantity:
-              item.quantity > 1
-                ? item.quantity - 1
-                : 1,
-          }
-        : item
-    )
-  );
-};
-
-const totalPrice = cartItems.reduce(
-  (acc, item) => acc + item.price * item.quantity,
-  0
-);
 
   const clearCart = () => {
-  setCartItems([]);
+    setCartItems([]);
 
-  toast.success("Cart cleared");
-};
+    toast.success("Cart cleared");
+  };
 
+  const checkout = () => {
+    toast.success("🎉 Order placed successfully!");
 
-const checkout = () => {
-  toast.success("🎉 Order placed successfully!");
-
-  setCartItems([]);
-  setIsCartOpen(false);
-};
+    setCartItems([]);
+    setIsCartOpen(false);
+  };
   return (
-  <CartContext.Provider
-  value={{
-    cartItems,
-    isCartOpen,
-    setIsCartOpen,
-    addToCart,
-    removeFromCart,
-    increaseQty,
-    decreaseQty,
-    clearCart,
-    checkout,
-    totalPrice,
-  }}
->
-  {children}
-</CartContext.Provider>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        isCartOpen,
+        setIsCartOpen,
+        addToCart,
+        removeFromCart,
+        increaseQty,
+        decreaseQty,
+        clearCart,
+        checkout,
+        totalPrice,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
   );
 };

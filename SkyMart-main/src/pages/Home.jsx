@@ -12,7 +12,7 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router";
 import Footer from "../components/Footer";
 import { useContext } from "react";
-import { CartContext } from "../context/CartContext";
+import { CartContext } from "../context/cart-context";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ProductCard from "../components/ProductCard";

@@ -103,11 +103,11 @@ const About = () => {
             className="mt-6 md:mt-8 text-4xl sm:text-5xl lg:text-6xl"
             style={{ fontFamily: "Clash Display" }}
           >
-            About <span className="text-[#FF8FC7]">PrimeBasket</span>
+            About <span className="text-[#FF8FC7]"></span>
           </h1>
 
           <p className="mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-[#6C6C6B]">
-            PrimeBasket is a next-generation e-commerce platform built to make
+            Wisteria Cart is a next-generation e-commerce platform built to make
             online shopping faster, smarter, and more enjoyable. We carefully
             curate products that combine quality, affordability, and seamless
             delivery.
@@ -154,7 +154,7 @@ const About = () => {
             </h2>
 
             <p className="text-[#6C6C6B] leading-7 md:leading-8">
-              PrimeBasket began with a simple idea — online shopping should feel
+              Wisteria Cart began with a simple idea — online shopping should feel
               effortless. We wanted to remove clutter, confusing interfaces, and
               overpriced products, replacing them with a clean shopping
               experience foZcused on quality and speed.
@@ -202,7 +202,7 @@ const About = () => {
             className="text-center text-3xl md:text-5xl"
             style={{ fontFamily: "Clash Display" }}
           >
-            Why Choose PrimeBasket
+            Why Choose Wisteria Cart
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 md:mt-12">
