@@ -7,7 +7,7 @@ const Footer = () => {
       </h2>
 
       <p className="text-[#6C6C6B] mt-4">
-        All Rights Reserved © 2026 PrimeBasket. Built with React & Tailwind CSS.
+        All Rights Reserved © 2026 SkyMart. Built with React & Tailwind CSS.
       </p>
 
       <p className="text-[#6C6C6B] mt-2">
